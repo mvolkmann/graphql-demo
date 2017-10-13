@@ -1,11 +1,14 @@
-const express = require('express');
-const graphqlHTTP = require('express-graphql');
-const app = express();
-const fetch = require('node-fetch');
-const schema = require('./schema');
 const DataLoader = require('dataloader');
+const express = require('express');
+const fetch = require('node-fetch');
+const graphqlHTTP = require('express-graphql');
+const schema = require('./schema');
 const util = require('util');
-const parseXML = util.promisify(require('xml2js').parseString);
+const xml2js = require('xml2js');
+
+const parseXML = util.promisify(xml2js.parseString);
+
+const app = express();
 
 const API_KEY = 'zMhn4I9tt4TTE415wmQVYA';
 // If you need to write data to the goodreads API,
