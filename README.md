@@ -20,13 +20,32 @@ Setup:
 To run:
 1) npm start
 2) browse localhost:4000/demo
-3) enter the following query in the left pane
-   query {
-     author(id: 21559) {
-       name,
-       books: {
-         isbn,
-         title
-       }
-     }
-   }
+3) enter a query in the left pane
+
+Example Queries:
+
+query {
+  author(id: 656983) {
+    name
+    books {
+      isbn
+      authors {
+        name
+      }
+      title
+      description
+    }
+  }
+}
+
+query {
+  book(id: 85009) {
+    title
+  }
+}
+
+Some Author Ids:
+Erich Gamma - 48622 (has books with multiple authors)
+J.R.R. Tolkien - 656983
+Kurt Vonnegut - 2778055
+Nassim Nicholas Taleb - 21559
