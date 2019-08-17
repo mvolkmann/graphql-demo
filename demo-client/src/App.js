@@ -3,7 +3,7 @@ import {gql} from 'apollo-boost';
 //import {WebSocketLink} from 'apollo-link-ws';
 import {object} from 'prop-types';
 import React, {useState} from 'react';
-import {useQuery, useSubscription} from '@apollo/react-hooks';
+import {useQuery, useMutation, useSubscription} from '@apollo/react-hooks';
 //import {Client, addGraphQLSubscriptions} from 'subscriptions-transport-ws';
 
 import './App.css';
@@ -53,6 +53,9 @@ const CREATE_USER = gql`
       lastName: $lastName
     ) {
       id
+      username
+      firstName
+      lastName
     }
   }
 `;
@@ -93,54 +96,52 @@ function App({client}) {
   const [firstName, setFirstName, firstNameRow] = useInputRow('First Name');
   const [lastName, setLastName, lastNameRow] = useInputRow('Last Name');
 
-  // const {
-  //   data: {newUser},
-  //   loading
-  // } = useSubscription(SUBSCRIBE_NEW_USERS);
+  const [createUser] = useMutation(CREATE_USER, {
+    onCompleted(data) {
+      const {createUser} = data.createUser;
+      setUsers(users.concat(createUser));
+      setUsername('');
+      setFirstName('');
+      setLastName('');
+    },
+    onError: handleError
+  });
+
+  const [deleteUser] = useMutation(DELETE_USER, {
+    onCompleted(data) {
+      const {deleteUser} = data;
+      if (deleteUser) {
+        const {id} = deleteUser;
+        setUsers(users.filter(user => user.id !== id));
+      } else {
+        console.log('This user was already deleted.');
+      }
+    },
+    onError: handleError
+  });
 
   const {loading, error, data} = useQuery(GET_USERS);
   if (loading) return <div>... loading ...</div>;
   if (error) return <div>Error: {error}</div>;
   if (users.length === 0) setUsers(data.allUsers);
 
+  // const {
+  //   data: {newUser},
+  //   loading
+  // } = useSubscription(SUBSCRIBE_NEW_USERS);
+
   function handleError(error) {
     alert(error);
   }
 
-  async function addUser(event) {
+  async function onAddUser(event) {
     event.preventDefault();
-
-    try {
-      const user = {username, firstName, lastName};
-      const res = await client.mutate({
-        mutation: CREATE_USER,
-        variables: user
-      });
-      const {id} = res.data.createUser;
-      user.id = id;
-      setUsers(users.concat(user));
-      setUsername('');
-      setFirstName('');
-      setLastName('');
-    } catch (e) {
-      handleError(e);
-    }
+    const user = {username, firstName, lastName};
+    createUser({variables: user});
   }
 
-  async function deleteUser(id) {
-    try {
-      const res = await client.mutate({
-        mutation: DELETE_USER,
-        variables: {
-          userId: id
-        }
-      });
-      const deleted = res.data.deleteUser;
-      if (!deleted) console.log('This user was already deleted.');
-      setUsers(users.filter(user => user.id !== id));
-    } catch (e) {
-      handleError(e);
-    }
+  async function onDeleteUser(id) {
+    deleteUser({variables: {userId: id}});
   }
 
   return (
@@ -161,12 +162,12 @@ function App({client}) {
               <td>{user.username}</td>
               <td>{user.firstName}</td>
               <td>{user.lastName}</td>
-              <td onClick={() => deleteUser(user.id)}>&#x1f5d1;</td>
+              <td onClick={() => onDeleteUser(user.id)}>&#x1f5d1;</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <form onSubmit={addUser}>
+      <form onSubmit={onAddUser}>
         {usernameRow}
         {firstNameRow}
         {lastNameRow}
