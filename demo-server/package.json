@@ -1,0 +1,23 @@
+{
+  "name": "demo-server",
+  "version": "1.0.0",
+  "description": "basic GraphQL server",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "nodemon server.js",
+    "starte": "node --experimental-modules server.mjs"
+  },
+  "author": "R. Mark Volkmann <r.mark.volkmann@gmail.com> (https://mvolkmann.github.io/)",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server": "^2.8.1",
+    "apollo-server-express": "^2.8.1",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "graphql": "^14.4.2"
+  },
+  "devDependencies": {
+    "morgan": "^1.9.1",
+    "nodemon": "^1.19.1"
+  }
+}
