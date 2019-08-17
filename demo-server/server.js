@@ -176,6 +176,9 @@ const pubSub = new PubSub();
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
+  context: async ({req, connection}) => {
+    return connection ? connection.context : {};
+  },
   subscriptions: {
     onConnect() {
       return users;
