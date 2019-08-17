@@ -91,7 +91,6 @@ function useInputRow(label) {
 }
 
 function App({client}) {
-  //const [users, setUsers] = useState([]);
   const [username, setUsername, usernameRow] = useInputRow('Username');
   const [firstName, setFirstName, firstNameRow] = useInputRow('First Name');
   const [lastName, setLastName, lastNameRow] = useInputRow('Last Name');
@@ -101,7 +100,7 @@ function App({client}) {
       setUsername('');
       setFirstName('');
       setLastName('');
-      refetch();
+      refetchUsers();
     },
     onError: handleError
   });
@@ -109,19 +108,23 @@ function App({client}) {
   const [deleteUser] = useMutation(DELETE_USER, {
     onCompleted(data) {
       const deleted = data.deleteUser;
-      if (deleted) refetch();
+      if (deleted) refetchUsers();
     },
     onError: handleError
   });
 
-  const {loading, error, data, refetch} = useQuery(GET_USERS);
-  if (loading) return <div>... loading ...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const {subscriptionData, loadingSubscription} = useSubscription(
+    SUBSCRIBE_NEW_USERS
+  );
+  if (!loadingSubscription) {
+    console.log('subscription returned subscriptionData =', subscriptionData);
+  }
 
-  // const {
-  //   data: {newUser},
-  //   loading
-  // } = useSubscription(SUBSCRIBE_NEW_USERS);
+  const {loading: loadingUsers, error, data, refetch: refetchUsers} = useQuery(
+    GET_USERS
+  );
+  if (loadingUsers) return <div>... loading ...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   function handleError(error) {
     alert(error);
