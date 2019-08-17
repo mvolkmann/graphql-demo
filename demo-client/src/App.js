@@ -91,39 +91,32 @@ function useInputRow(label) {
 }
 
 function App({client}) {
-  const [users, setUsers] = useState([]);
+  //const [users, setUsers] = useState([]);
   const [username, setUsername, usernameRow] = useInputRow('Username');
   const [firstName, setFirstName, firstNameRow] = useInputRow('First Name');
   const [lastName, setLastName, lastNameRow] = useInputRow('Last Name');
 
   const [createUser] = useMutation(CREATE_USER, {
     onCompleted(data) {
-      const {createUser} = data.createUser;
-      setUsers(users.concat(createUser));
       setUsername('');
       setFirstName('');
       setLastName('');
+      refetch();
     },
     onError: handleError
   });
 
   const [deleteUser] = useMutation(DELETE_USER, {
     onCompleted(data) {
-      const {deleteUser} = data;
-      if (deleteUser) {
-        const {id} = deleteUser;
-        setUsers(users.filter(user => user.id !== id));
-      } else {
-        console.log('This user was already deleted.');
-      }
+      const deleted = data.deleteUser;
+      if (deleted) refetch();
     },
     onError: handleError
   });
 
-  const {loading, error, data} = useQuery(GET_USERS);
+  const {loading, error, data, refetch} = useQuery(GET_USERS);
   if (loading) return <div>... loading ...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (users.length === 0) setUsers(data.allUsers);
 
   // const {
   //   data: {newUser},
@@ -143,6 +136,8 @@ function App({client}) {
   async function onDeleteUser(id) {
     deleteUser({variables: {userId: id}});
   }
+
+  const users = data.allUsers || [];
 
   return (
     <div className="App">
