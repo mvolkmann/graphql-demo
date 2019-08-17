@@ -1,8 +1,9 @@
-import ApolloClient, {gql} from 'apollo-boost';
-//import {useSubscription} from '@apollo/react-hooks';
+import {gql} from 'apollo-boost';
 //import {HttpLink} from 'apollo-link-http';
 //import {WebSocketLink} from 'apollo-link-ws';
-import React, {useEffect, useState} from 'react';
+import {object} from 'prop-types';
+import React, {useState} from 'react';
+import {useQuery, useSubscription} from '@apollo/react-hooks';
 //import {Client, addGraphQLSubscriptions} from 'subscriptions-transport-ws';
 
 import './App.css';
@@ -20,14 +21,6 @@ const networkInterfaceWithSubscriptions = addGraphQLSubscriptions(
   wsClient
 );
 */
-const client = new ApolloClient({
-  uri: 'http://localhost:1919/graphql',
-  // link: new HttpLink({
-  //   uri: 'http://localhost:1919/graphql'
-  // }),
-  connectToDevTools: true
-});
-
 // const wsLink = new WebSocketLink({
 //   uri: `ws://localhost:5000/`,
 //   options: {
@@ -94,7 +87,7 @@ function useInputRow(label) {
   return [value, setValue, component];
 }
 
-function App() {
+function App({client}) {
   const [users, setUsers] = useState([]);
   const [username, setUsername, usernameRow] = useInputRow('Username');
   const [firstName, setFirstName, firstNameRow] = useInputRow('First Name');
@@ -105,17 +98,13 @@ function App() {
   //   loading
   // } = useSubscription(SUBSCRIBE_NEW_USERS);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const {loading, error, data} = useQuery(GET_USERS);
+  if (loading) return <div>... loading ...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (users.length === 0) setUsers(data.allUsers);
 
   function handleError(error) {
     alert(error);
-  }
-
-  async function loadData() {
-    const res = await client.query({query: GET_USERS});
-    setUsers(res.data.allUsers);
   }
 
   async function addUser(event) {
@@ -157,8 +146,6 @@ function App() {
   return (
     <div className="App">
       <h1>Users</h1>
-      {/* <div>loading = {loading}</div>
-      <div>newUser = {newUser}</div> */}
       <table>
         <thead>
           <tr>
@@ -188,5 +175,9 @@ function App() {
     </div>
   );
 }
+
+App.props = {
+  client: object.isRequired
+};
 
 export default App;
