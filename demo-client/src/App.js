@@ -131,19 +131,14 @@ function App({client}) {
   if (error) return <div>Error: {error}</div>;
 
   async function doFetch() {
+    const query = '{allUsers {id username lastName firstName}}';
+    const result = await sendGQL(query);
+    console.log('App.js doFetch: result =', result);
+  }
+
+  async function sendGQL(query) {
     const url = 'http://localhost:1919/graphql';
-    const body = {
-      query: `
-        {
-          allUsers {
-            id
-            username
-            lastName
-            firstName
-          }
-        }
-      `
-    };
+    const body = {query};
     const headers = {
       'Content-Type': 'application/json'
     };
@@ -157,8 +152,7 @@ function App({client}) {
         throw new Error(await res.text());
       }
       const result = await res.json();
-      const {allUsers} = result.data;
-      console.log('App.js doFetch: allUsers =', allUsers);
+      return result.data;
     } catch (e) {
       handleError(e);
     }
