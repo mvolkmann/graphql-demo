@@ -27,6 +27,7 @@ mutation {
 
 const {PubSub} = require('apollo-server');
 const {ApolloServer, gql} = require('apollo-server-express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
@@ -34,6 +35,7 @@ const morgan = require('morgan');
 const app = express();
 app.use(morgan('combined'));
 app.use(cors());
+app.use(bodyParser.json());
 
 const addresses = {
   1: {

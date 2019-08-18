@@ -2,7 +2,7 @@ import {gql} from 'apollo-boost';
 //import {HttpLink} from 'apollo-link-http';
 //import {WebSocketLink} from 'apollo-link-ws';
 import {object} from 'prop-types';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useQuery, useMutation, useSubscription} from '@apollo/react-hooks';
 //import {Client, addGraphQLSubscriptions} from 'subscriptions-transport-ws';
 
@@ -95,6 +95,10 @@ function App({client}) {
   const [firstName, setFirstName, firstNameRow] = useInputRow('First Name');
   const [lastName, setLastName, lastNameRow] = useInputRow('Last Name');
 
+  useEffect(() => {
+    doFetch();
+  }, []);
+
   const [createUser] = useMutation(CREATE_USER, {
     onCompleted(data) {
       setUsername('');
@@ -125,6 +129,40 @@ function App({client}) {
   );
   if (loadingUsers) return <div>... loading ...</div>;
   if (error) return <div>Error: {error}</div>;
+
+  async function doFetch() {
+    const url = 'http://localhost:1919/graphql';
+    const body = {
+      query: `
+        {
+          allUsers {
+            id
+            username
+            lastName
+            firstName
+          }
+        }
+      `
+    };
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      const result = await res.json();
+      const {allUsers} = result.data;
+      console.log('App.js doFetch: allUsers =', allUsers);
+    } catch (e) {
+      handleError(e);
+    }
+  }
 
   function handleError(error) {
     alert(error);
